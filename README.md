@@ -4,7 +4,7 @@
 使用方法
 1. 下载代码
 2. cargo build --release 编译
-3.
+3.使用说明
 
 ![image](https://user-images.githubusercontent.com/22612129/182601276-fe8c1485-c3c0-48ef-9fcd-9f481f65afc9.png)
 
