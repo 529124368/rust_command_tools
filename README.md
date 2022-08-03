@@ -1,0 +1,2 @@
+# rust_command_tools
+通过rust的clap框架，实现的一个简单的git快速提交命令行工具
