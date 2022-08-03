@@ -55,7 +55,7 @@ fn main() {
             let mes = sub_matches
                 .get_one::<String>("REMOTE_URL")
                 .expect("please input url");
-            let mes = "git remote add  origin ".to_string() + mes;
+            let mes = "git remote add origin ".to_string() + mes;
             if send_cmd(mes) == ExitStatus::from_raw(0) {
                 if send_cmd("git add .") == ExitStatus::from_raw(0) {
                     let mes = sub_matches
