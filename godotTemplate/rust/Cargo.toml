@@ -1,0 +1,12 @@
+[package]
+name = "my_awesome_game"
+version = "0.1.0"
+authors = ["529124368 <529124368@qq.com>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib", "staticlib"]
+
+[dependencies]
+gdnative = "0.10.0"
+# gdnative = { path = "../../godot-rust/gdnative" }

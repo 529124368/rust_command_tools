@@ -7,3 +7,5 @@ version = "0.1.0"
 
 [dependencies]
 clap = "3.2"
+colored = "2.0.0"
+rust-embed = "6.4.0"

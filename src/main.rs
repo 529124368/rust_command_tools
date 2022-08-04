@@ -1,12 +1,22 @@
 use clap::{arg, Command};
+use colored::*;
+use rust_embed::RustEmbed;
 use std::{
     ffi::OsStr,
+    io::Write,
     os::windows::process::ExitStatusExt,
     process::{Command as Cmd, ExitStatus},
 };
+
+mod tools;
+use tools::file_tool;
+#[derive(RustEmbed)]
+#[folder = "godotTemplate"]
+struct Asset;
+
 fn main() {
-    let comm = Command::new("Git Tools")
-        .about("Git提交快捷命令行")
+    let comm = Command::new("Git + Godot Tools")
+        .about("Git提交快捷命令行+ Godot游戏引擎之rust环境模版快速创建")
         .subcommand(
             Command::new("add_commit")
                 .about("本地添加和提交到本地仓库的快捷指令")
@@ -27,6 +37,11 @@ fn main() {
                 .short_flag('r')
                 .arg(arg!(-l <REMOTE_URL> "远程地址"))
                 .arg(arg!(-w <COMMENT> "注释"))
+                .arg_required_else_help(true),
+        ).subcommand(
+            Command::new("new")
+                .about("godot游戏引擎的rust脚本模版创建")
+                .arg(arg!(<PROJECT_NAME> "工程名字"))
                 .arg_required_else_help(true),
         );
     //dispact
@@ -67,6 +82,25 @@ fn main() {
                     }
                 }
             }
+        }
+        Some(("new", sub_matches)) => {
+            let mes = sub_matches
+                .get_one::<String>("PROJECT_NAME")
+                .expect("please input project name");
+            //export
+            let root = "./".to_string() + mes + "/";
+            file_tool::create_dir(&root).unwrap();
+            for f in Asset::iter() {
+                let mut handle = file_tool::super_create(&(root.to_string() + f.as_ref()));
+                handle
+                    .write_all(Asset::get(f.as_ref()).unwrap().data.as_ref())
+                    .unwrap();
+                println!("{}", ("created: ".to_string() + f.as_ref()));
+            }
+            println!(
+                "{}",
+                ("SUCCESS: A new project has been created ".to_string() + mes).green()
+            );
         }
         _ => unreachable!(),
     }
