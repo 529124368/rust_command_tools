@@ -3,7 +3,7 @@ use colored::*;
 use rust_embed::RustEmbed;
 use std::{
     ffi::OsStr,
-    io::Write,
+    io::{Read, Write},
     os::windows::process::ExitStatusExt,
     process::{Command as Cmd, ExitStatus},
 };
@@ -40,8 +40,14 @@ fn main() {
                 .arg_required_else_help(true),
         ).subcommand(
             Command::new("new")
-                .about("godot游戏引擎的rust脚本模版创建")
-                .arg(arg!(<PROJECT_NAME> "工程名字"))
+                .about("this creates a new project using the default template")
+                .arg(arg!(<PROJECT_NAME> "project name"))
+                .arg_required_else_help(true),
+        ).subcommand(
+            Command::new("class")
+                .about("creates a class")
+                .arg(arg!(<CLASS_NAME> "class name"))
+                .arg(arg!([NODE_NAME] "node name"))
                 .arg_required_else_help(true),
         );
     //dispact
@@ -55,6 +61,7 @@ fn main() {
                 send_cmd(mes);
             }
         }
+        //
         Some(("add_commit_push", sub_matches)) => {
             if send_cmd("git add .") == ExitStatus::from_raw(0) {
                 let mes = sub_matches
@@ -66,6 +73,7 @@ fn main() {
                 }
             }
         }
+        //
         Some(("register_add_commit_push", sub_matches)) => {
             let mes = sub_matches
                 .get_one::<String>("REMOTE_URL")
@@ -83,6 +91,7 @@ fn main() {
                 }
             }
         }
+        //
         Some(("new", sub_matches)) => {
             let mes = sub_matches
                 .get_one::<String>("PROJECT_NAME")
@@ -91,16 +100,81 @@ fn main() {
             let root = "./".to_string() + mes + "/";
             file_tool::create_dir(&root).unwrap();
             for f in Asset::iter() {
-                let mut handle = file_tool::super_create(&(root.to_string() + f.as_ref()));
-                let s = String::from_utf8_lossy(Asset::get(f.as_ref()).unwrap().data.as_ref())
-                    .replace("@_", mes);
-                handle.write_all(s.as_bytes()).unwrap();
-                println!("{}", ("created: ".to_string() + f.as_ref()));
+                if !f.eq("template.txt") {
+                    let mut handle = file_tool::super_create(&(root.to_string() + f.as_ref()));
+                    let s = String::from_utf8_lossy(Asset::get(f.as_ref()).unwrap().data.as_ref())
+                        .replace("@_", mes);
+                    handle.write_all(s.as_bytes()).unwrap();
+                    println!("{}", ("created: ".to_string() + f.as_ref()));
+                }
             }
             println!(
                 "{}",
                 ("SUCCESS: A new project has been created ".to_string() + mes).green()
             );
+        }
+        //
+        Some(("class", sub_matches)) => {
+            let class_name = sub_matches
+                .get_one::<String>("CLASS_NAME")
+                .expect("please input class name");
+            //修改lib.rs 文件追加class
+            if let Ok(mut f) = file_tool::read_file("./rust/src/lib.rs") {
+                //替换文字
+                let mut fbuf = String::new();
+                f.read_to_string(&mut fbuf).unwrap();
+                let ss = fbuf
+                    .replace(
+                        "fn init(handle: InitHandle) {",
+                        &("fn init(handle: InitHandle) {\n    handle.add_class::<".to_string()
+                            + class_name
+                            + "::"
+                            + &class_name[..1].to_uppercase()
+                            + &class_name[1..]
+                            + ">();"),
+                    )
+                    .replace(
+                        "mod game;",
+                        &("mod game;\nmod ".to_string() + class_name + ";"),
+                    );
+                //读取
+                let mut f = file_tool::over_write_open("./rust/src/lib.rs").unwrap();
+                f.write_all(ss.as_bytes()).unwrap();
+                f.flush().unwrap();
+                //添加对应的rust脚本文件
+                if let Some(node_name) = sub_matches.get_one::<String>("NODE_NAME") {
+                    //自定义场合
+                    let f =
+                        String::from_utf8_lossy(Asset::get("template.txt").unwrap().data.as_ref())
+                            .replace("_@", node_name)
+                            .replace(
+                                "@_",
+                                &(class_name[..1].to_uppercase().to_string() + &class_name[1..]),
+                            );
+
+                    let mut handle =
+                        file_tool::create_file(&("./rust/src/".to_string() + class_name + ".rs"))
+                            .unwrap();
+                    handle.write_all(f.as_bytes()).unwrap();
+                } else {
+                    //非自定义场合 node
+                    //自定义场合
+                    let f =
+                        String::from_utf8_lossy(Asset::get("template.txt").unwrap().data.as_ref())
+                            .replace("_@", "Node")
+                            .replace(
+                                "@_",
+                                &(class_name[..1].to_uppercase().to_string() + &class_name[1..]),
+                            );
+
+                    let mut handle =
+                        file_tool::create_file(&("./rust/src/".to_string() + class_name + ".rs"))
+                            .unwrap();
+                    handle.write_all(f.as_bytes()).unwrap();
+                }
+            } else {
+                println!("{}", "can't find file :  lib.rs".red());
+            }
         }
         _ => unreachable!(),
     }

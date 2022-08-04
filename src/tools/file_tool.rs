@@ -1,5 +1,5 @@
 use std::{
-    fs::{self, File},
+    fs::{self, File, OpenOptions},
     path::Path,
 };
 
@@ -27,4 +27,12 @@ pub fn super_create(path: &str) -> File {
     } else {
         return create_file(path).unwrap();
     }
+}
+
+pub fn read_file(path: &str) -> std::io::Result<File> {
+    Ok(OpenOptions::new().read(true).open(path)?)
+}
+
+pub fn over_write_open(path: &str) -> std::io::Result<File> {
+    Ok(OpenOptions::new().write(true).truncate(true).open(path)?)
 }
