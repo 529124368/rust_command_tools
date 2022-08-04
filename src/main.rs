@@ -40,12 +40,12 @@ fn main() {
                 .arg_required_else_help(true),
         ).subcommand(
             Command::new("new")
-                .about("this creates a new project using the default template")
+                .about("使用godot-tust默认模版创建一个工程")
                 .arg(arg!(<PROJECT_NAME> "project name"))
                 .arg_required_else_help(true),
         ).subcommand(
             Command::new("class")
-                .about("creates a class")
+                .about("快速创建godot-tust的rust GDnative脚本")
                 .arg(arg!(<CLASS_NAME> "class name"))
                 .arg(arg!([NODE_NAME] "node name"))
                 .arg_required_else_help(true),
@@ -123,20 +123,16 @@ fn main() {
                 //替换文字
                 let mut fbuf = String::new();
                 f.read_to_string(&mut fbuf).unwrap();
-                let ss = fbuf
-                    .replace(
-                        "fn init(handle: InitHandle) {",
-                        &("fn init(handle: InitHandle) {\n    handle.add_class::<".to_string()
-                            + class_name
-                            + "::"
-                            + &class_name[..1].to_uppercase()
-                            + &class_name[1..]
-                            + ">();"),
-                    )
-                    .replace(
-                        "mod game;",
-                        &("mod game;\nmod ".to_string() + class_name + ";"),
-                    );
+                let ss = fbuf.replace(
+                    "fn init(handle: InitHandle) {",
+                    &("fn init(handle: InitHandle) {\n    handle.add_class::<".to_string()
+                        + class_name
+                        + "::"
+                        + &class_name[..1].to_uppercase()
+                        + &class_name[1..]
+                        + ">();"),
+                );
+                let ss = ("mod ".to_string() + class_name + ";\n").to_string() + &ss;
                 //读取
                 let mut f = file_tool::over_write_open("./rust/src/lib.rs").unwrap();
                 f.write_all(ss.as_bytes()).unwrap();
