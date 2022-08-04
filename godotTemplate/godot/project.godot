@@ -14,7 +14,7 @@ _global_script_class_icons={
 
 [application]
 
-config/name="my-awesome-game"
+config/name="@_"
 run/main_scene="res://scenes/Game.tscn"
 config/icon="res://assets/godot-ferris-32x32.png"
 

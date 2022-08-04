@@ -1,8 +1,8 @@
 [package]
-name = "my_awesome_game"
-version = "0.1.0"
+name = "@_"
 authors = ["529124368 <529124368@qq.com>"]
 edition = "2018"
+version = "0.1.0"
 
 [lib]
 crate-type = ["cdylib", "staticlib"]

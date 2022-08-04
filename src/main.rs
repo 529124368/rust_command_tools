@@ -92,9 +92,9 @@ fn main() {
             file_tool::create_dir(&root).unwrap();
             for f in Asset::iter() {
                 let mut handle = file_tool::super_create(&(root.to_string() + f.as_ref()));
-                handle
-                    .write_all(Asset::get(f.as_ref()).unwrap().data.as_ref())
-                    .unwrap();
+                let s = String::from_utf8_lossy(Asset::get(f.as_ref()).unwrap().data.as_ref())
+                    .replace("@_", mes);
+                handle.write_all(s.as_bytes()).unwrap();
                 println!("{}", ("created: ".to_string() + f.as_ref()));
             }
             println!(
