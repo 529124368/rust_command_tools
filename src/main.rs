@@ -63,13 +63,15 @@ fn main() {
         }
         //
         Some(("add_commit_push", sub_matches)) => {
-            if send_cmd("git add .") == ExitStatus::from_raw(0) {
-                let mes = sub_matches
-                    .get_one::<String>("COMMENT")
-                    .expect("please input comment");
-                let mes = "git commit -m ".to_string() + mes;
-                if send_cmd(mes) == ExitStatus::from_raw(0) {
-                    send_cmd("git push origin master");
+            if send_cmd("git pull origin master") == ExitStatus::from_raw(0) {
+                if send_cmd("git add .") == ExitStatus::from_raw(0) {
+                    let mes = sub_matches
+                        .get_one::<String>("COMMENT")
+                        .expect("please input comment");
+                    let mes = "git commit -m ".to_string() + mes;
+                    if send_cmd(mes) == ExitStatus::from_raw(0) {
+                        send_cmd("git push origin master");
+                    }
                 }
             }
         }
